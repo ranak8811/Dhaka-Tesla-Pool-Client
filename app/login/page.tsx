@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { Zap, Car, User, AlertCircle, Loader2 } from 'lucide-react';
 
@@ -163,6 +164,16 @@ export default function LoginPage() {
               ) : null}
               Sign In with Credentials
             </button>
+
+            <div className="mt-3 text-center text-xs text-zinc-600 dark:text-zinc-400">
+              Don&apos;t have an account?{' '}
+              <Link
+                href="/register"
+                className="font-bold text-emerald-600 hover:underline dark:text-emerald-400"
+              >
+                Create an account
+              </Link>
+            </div>
           </form>
 
           <div className="relative my-6">
