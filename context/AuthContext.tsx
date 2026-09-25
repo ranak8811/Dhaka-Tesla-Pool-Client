@@ -21,6 +21,12 @@ interface AuthContextType {
   token: string | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  register: (
+    name: string,
+    email: string,
+    password: string,
+    role?: 'PASSENGER' | 'DRIVER',
+  ) => Promise<void>;
   logout: () => void;
 }
 
@@ -74,6 +80,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const register = async (
+    name: string,
+    email: string,
+    password: string,
+    role: 'PASSENGER' | 'DRIVER' = 'PASSENGER',
+  ): Promise<void> => {
+    const data = await apiClient<AuthResponse>('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ name, email, password, role }),
+    });
+
+    localStorage.setItem('tesla_token', data.accessToken);
+    localStorage.setItem('tesla_user', JSON.stringify(data.user));
+
+    setSession({ user: data.user, token: data.accessToken });
+
+    if (data.user.role === 'DRIVER') {
+      router.push('/driver');
+    } else {
+      router.push('/passenger');
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem('tesla_token');
     localStorage.removeItem('tesla_user');
@@ -86,7 +115,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isLoading = !isHydrated;
 
   return (
-    <AuthContext.Provider value={{ user, token, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, token, isLoading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
