@@ -20,7 +20,8 @@ export interface ActiveRide {
   pickupZone: string;
   destinationZone: string;
   seatsRequested: number;
-  farePoysha: number;
+  farePoysha?: number;
+  totalFarePoysha?: number;
   status: RideStatus;
   createdAt?: string;
   pool?: {
@@ -86,7 +87,8 @@ export default function RideStatusTracker({
   const isCancelled = ride.status === 'CANCELLED';
   const driver = ride.pool?.vehicle?.driver;
   const vehicle = ride.pool?.vehicle;
-  const fareBdt = (ride.farePoysha / 100).toFixed(2);
+  const poysha = ride.totalFarePoysha ?? ride.farePoysha ?? 0;
+  const fareBdt = (poysha / 100).toFixed(2);
 
   return (
     <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
@@ -96,12 +98,12 @@ export default function RideStatusTracker({
             Live Corridor Ride
           </span>
           <h2 className="text-lg font-black text-zinc-900 dark:text-white">
-            {ride.pickupZone} ➔ {ride.destinationZone}
+            {ride.pickupZone || 'Pickup'} ➔ {ride.destinationZone || 'Destination'}
           </h2>
         </div>
         <div className="flex items-center gap-2">
           <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-bold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
-            {ride.seatsRequested} {ride.seatsRequested === 1 ? 'Seat' : 'Seats'}
+            {ride.seatsRequested || 1} {ride.seatsRequested === 1 ? 'Seat' : 'Seats'}
           </span>
           <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-extrabold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
             ৳{fareBdt}

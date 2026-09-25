@@ -80,10 +80,16 @@ export default function DriverPage() {
   const refreshActivePool = useCallback(async () => {
     if (!user) return;
     try {
-      const pool = await apiClient<ActivePoolData | null>('/driver/active-pool');
-      setActivePool(pool);
+      const pool = await apiClient<ActivePoolData | null>(
+        '/driver/active-pool',
+      );
+      if (pool && pool.poolId) {
+        setActivePool(pool);
+      } else {
+        setActivePool(null);
+      }
     } catch {
-      // If error or unauthenticated, keep null
+      setActivePool(null);
     }
   }, [user]);
 
@@ -92,12 +98,20 @@ export default function DriverPage() {
     async function fetchInitialPool() {
       if (!user) return;
       try {
-        const pool = await apiClient<ActivePoolData | null>('/driver/active-pool');
+        const pool = await apiClient<ActivePoolData | null>(
+          '/driver/active-pool',
+        );
         if (!ignore) {
-          setActivePool(pool);
+          if (pool && pool.poolId) {
+            setActivePool(pool);
+          } else {
+            setActivePool(null);
+          }
         }
       } catch {
-        // No pool
+        if (!ignore) {
+          setActivePool(null);
+        }
       }
     }
 

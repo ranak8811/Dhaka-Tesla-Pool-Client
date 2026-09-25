@@ -29,11 +29,22 @@ export async function apiClient<T = unknown>(
     headers,
   });
 
-  const data = await response.json().catch(() => ({}));
+  const text = await response.text();
+  let data: any = null;
+  if (text && text.trim().length > 0) {
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = text;
+    }
+  }
 
   if (!response.ok) {
     const errorMsg =
-      data.message || `Request failed with status ${response.status}`;
+      (data && typeof data === 'object' && data.message) ||
+      (typeof data === 'string'
+        ? data
+        : `Request failed with status ${response.status}`);
     throw new Error(Array.isArray(errorMsg) ? errorMsg.join(', ') : errorMsg);
   }
 

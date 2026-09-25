@@ -55,6 +55,7 @@ export default function PassengerPage() {
   const [isQuoteLoading, setIsQuoteLoading] = useState<boolean>(false);
 
   const [activeRide, setActiveRide] = useState<ActiveRide | null>(null);
+  const [isCheckingRide, setIsCheckingRide] = useState<boolean>(true);
   const [isBooking, setIsBooking] = useState<boolean>(false);
   const [isCancelling, setIsCancelling] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -87,23 +88,40 @@ export default function PassengerPage() {
     if (!user) return;
     try {
       const ride = await apiClient<ActiveRide | null>('/rides/active');
-      setActiveRide(ride);
+      if (ride && ride.id) {
+        setActiveRide(ride);
+      } else {
+        setActiveRide(null);
+      }
     } catch {
-      // If no active ride or unauthorized, keep null
+      setActiveRide(null);
     }
   }, [user]);
 
   useEffect(() => {
     let ignore = false;
     async function fetchInitialRide() {
-      if (!user) return;
+      if (!user) {
+        setIsCheckingRide(false);
+        return;
+      }
       try {
         const ride = await apiClient<ActiveRide | null>('/rides/active');
         if (!ignore) {
-          setActiveRide(ride);
+          if (ride && ride.id) {
+            setActiveRide(ride);
+          } else {
+            setActiveRide(null);
+          }
         }
       } catch {
-        // No active ride
+        if (!ignore) {
+          setActiveRide(null);
+        }
+      } finally {
+        if (!ignore) {
+          setIsCheckingRide(false);
+        }
       }
     }
 
@@ -204,7 +222,9 @@ export default function PassengerPage() {
       });
 
       const rideData = (response.ride || response) as ActiveRide;
-      setActiveRide(rideData);
+      if (rideData && rideData.id) {
+        setActiveRide(rideData);
+      }
       await refreshActiveRide();
     } catch (err: unknown) {
       const msg =
@@ -243,7 +263,7 @@ export default function PassengerPage() {
     setQuote(null);
   };
 
-  if (isLoading || !user) {
+  if (isLoading || !user || isCheckingRide) {
     return (
       <div className="flex flex-1 items-center justify-center p-8">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-emerald-600 border-t-transparent" />
