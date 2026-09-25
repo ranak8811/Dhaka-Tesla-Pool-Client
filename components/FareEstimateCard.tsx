@@ -24,6 +24,7 @@ interface FareEstimateCardProps {
   loading: boolean;
   onBook: () => void;
   isBooking: boolean;
+  seatsRequested?: number;
 }
 
 export default function FareEstimateCard({
@@ -31,6 +32,7 @@ export default function FareEstimateCard({
   loading,
   onBook,
   isBooking,
+  seatsRequested = 1,
 }: FareEstimateCardProps) {
   if (loading) {
     return (
@@ -57,6 +59,13 @@ export default function FareEstimateCard({
     );
   }
 
+  const seats = Math.max(1, seatsRequested);
+  const pooledSingleBdt = quote.pooled.totalFareBdt;
+  const pooledTotalBdt = pooledSingleBdt * seats;
+  const soloSingleBdt = quote.solo.totalFareBdt;
+  const soloTotalBdt = soloSingleBdt * seats;
+  const savingsTotalBdt = quote.pooled.savingsBdt * seats;
+
   return (
     <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
       <div className="flex items-center justify-between border-b border-zinc-100 pb-4 dark:border-zinc-800">
@@ -78,9 +87,11 @@ export default function FareEstimateCard({
         <div className="rounded-xl border border-zinc-200 bg-zinc-50/60 p-4 dark:border-zinc-800 dark:bg-zinc-800/40">
           <span className="text-xs font-semibold text-zinc-500">Solo Ride</span>
           <p className="mt-1 text-2xl font-black text-zinc-700 dark:text-zinc-300">
-            ৳{quote.solo.totalFareBdt.toFixed(2)}
+            ৳{soloTotalBdt.toFixed(2)}
           </p>
-          <span className="text-[11px] text-zinc-400">Regular single-rider fare</span>
+          <span className="text-[11px] text-zinc-400">
+            {seats > 1 ? `৳${soloSingleBdt.toFixed(2)} × ${seats} seats` : 'Regular single-rider fare'}
+          </span>
         </div>
 
         <div className="relative rounded-xl border-2 border-emerald-500 bg-emerald-50/40 p-4 dark:border-emerald-600 dark:bg-emerald-950/20">
@@ -88,29 +99,39 @@ export default function FareEstimateCard({
             Best Value
           </div>
           <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">
-            Tesla Pool (Shared)
+            Tesla Pool ({seats} {seats === 1 ? 'Seat' : 'Seats'})
           </span>
           <p className="mt-1 text-2xl font-black text-emerald-600 dark:text-emerald-400">
-            ৳{quote.pooled.totalFareBdt.toFixed(2)}
+            ৳{pooledTotalBdt.toFixed(2)}
           </p>
           <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">
-            You save ৳{quote.pooled.savingsBdt.toFixed(2)} in Bullet!
+            {seats > 1
+              ? `৳${pooledSingleBdt.toFixed(2)}/seat • Save ৳${savingsTotalBdt.toFixed(2)}`
+              : `You save ৳${savingsTotalBdt.toFixed(2)} in Bullet!`}
           </span>
         </div>
       </div>
 
       <div className="mt-4 rounded-lg bg-zinc-50 p-3 text-xs text-zinc-600 dark:bg-zinc-800/50 dark:text-zinc-400">
         <div className="flex justify-between py-0.5">
-          <span>Base Fare:</span>
-          <span className="font-mono">৳{(quote.baseFarePoysha / 100).toFixed(2)}</span>
+          <span>Rate per Seat:</span>
+          <span className="font-mono">৳{pooledSingleBdt.toFixed(2)}</span>
         </div>
         <div className="flex justify-between py-0.5">
-          <span>Distance Charge ({quote.distanceKm} km × ৳15/km):</span>
-          <span className="font-mono">৳{(quote.distanceChargePoysha / 100).toFixed(2)}</span>
+          <span>Seats Selected:</span>
+          <span className="font-mono font-bold text-zinc-800 dark:text-zinc-200">{seats}</span>
+        </div>
+        <div className="flex justify-between py-0.5">
+          <span>Base Fare ({seats}x):</span>
+          <span className="font-mono">৳{(((quote.baseFarePoysha * seats)) / 100).toFixed(2)}</span>
+        </div>
+        <div className="flex justify-between py-0.5">
+          <span>Distance Charge ({quote.distanceKm} km × {seats}x):</span>
+          <span className="font-mono">৳{(((quote.distanceChargePoysha * seats)) / 100).toFixed(2)}</span>
         </div>
         <div className="flex justify-between border-t border-zinc-200 pt-1 font-semibold text-emerald-600 dark:border-zinc-700 dark:text-emerald-400">
-          <span>Pool Discount (25% off):</span>
-          <span className="font-mono">-৳{quote.pooled.savingsBdt.toFixed(2)}</span>
+          <span>Total Fare ({seats} {seats === 1 ? 'seat' : 'seats'}):</span>
+          <span className="font-mono">৳{pooledTotalBdt.toFixed(2)}</span>
         </div>
       </div>
 
@@ -122,12 +143,12 @@ export default function FareEstimateCard({
         {isBooking ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />
-            <span>Reserving Your Seat...</span>
+            <span>Reserving Your Seat{seats > 1 ? 's' : ''}...</span>
           </>
         ) : (
           <>
             <ShieldCheck className="h-4 w-4" />
-            <span>Confirm Booking • ৳{quote.pooled.totalFareBdt.toFixed(2)}</span>
+            <span>Confirm Booking ({seats} {seats === 1 ? 'Seat' : 'Seats'}) • ৳{pooledTotalBdt.toFixed(2)}</span>
           </>
         )}
       </button>

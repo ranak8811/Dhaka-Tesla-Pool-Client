@@ -331,10 +331,14 @@ export default function PassengerPage() {
                 <select
                   value={pickupZone}
                   onChange={(e) => handlePickupChange(e.target.value)}
-                  className="mt-1.5 block w-full rounded-xl border border-zinc-300 bg-zinc-50/50 px-3.5 py-2.5 text-sm font-semibold text-zinc-900 transition-colors focus:border-emerald-600 focus:bg-white focus:outline-none dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-white"
+                  className="mt-1.5 block w-full rounded-xl border border-zinc-300 bg-white px-3.5 py-2.5 text-sm font-semibold text-zinc-900 shadow-sm transition-colors focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-emerald-500"
                 >
                   {zones.map((z) => (
-                    <option key={`pickup-${z.id}`} value={z.id}>
+                    <option
+                      key={`pickup-${z.id}`}
+                      value={z.id}
+                      className="bg-white text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100"
+                    >
                       {z.name} {z.isHub ? '★ Hub' : ''} ({z.corridor})
                     </option>
                   ))}
@@ -349,10 +353,14 @@ export default function PassengerPage() {
                 <select
                   value={destinationZone}
                   onChange={(e) => handleDestinationChange(e.target.value)}
-                  className="mt-1.5 block w-full rounded-xl border border-zinc-300 bg-zinc-50/50 px-3.5 py-2.5 text-sm font-semibold text-zinc-900 transition-colors focus:border-emerald-600 focus:bg-white focus:outline-none dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-white"
+                  className="mt-1.5 block w-full rounded-xl border border-zinc-300 bg-white px-3.5 py-2.5 text-sm font-semibold text-zinc-900 shadow-sm transition-colors focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-emerald-500"
                 >
                   {zones.map((z) => (
-                    <option key={`dest-${z.id}`} value={z.id}>
+                    <option
+                      key={`dest-${z.id}`}
+                      value={z.id}
+                      className="bg-white text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100"
+                    >
                       {z.name} {z.isHub ? '★ Hub' : ''} ({z.corridor})
                     </option>
                   ))}
@@ -390,6 +398,7 @@ export default function PassengerPage() {
               loading={isQuoteLoading}
               onBook={handleBookRide}
               isBooking={isBooking}
+              seatsRequested={seatsRequested}
             />
           </div>
         </div>
