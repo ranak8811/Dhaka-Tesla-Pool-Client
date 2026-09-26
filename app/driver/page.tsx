@@ -8,6 +8,7 @@ import BulletCapacityBadge from '@/components/BulletCapacityBadge';
 import PassengerManifestTable, {
   ManifestPassenger,
 } from '@/components/PassengerManifestTable';
+import IncomingRideRequestsCard from '@/components/IncomingRideRequestsCard';
 import TripActionButtons from '@/components/TripActionButtons';
 import DriverHistoryModal from '@/components/DriverHistoryModal';
 import {
@@ -27,6 +28,7 @@ interface ActivePoolData {
   maxCapacity: number;
   status: string;
   passengers: ManifestPassenger[];
+  pendingRequests?: ManifestPassenger[];
 }
 
 interface ProfileResponse {
@@ -54,6 +56,7 @@ export default function DriverPage() {
   const [isUpdatingTrip, setIsUpdatingTrip] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isHistoryOpen, setIsHistoryOpen] = useState<boolean>(false);
+  const [processingRequestId, setProcessingRequestId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -175,6 +178,42 @@ export default function DriverPage() {
     }
   };
 
+  const handleAcceptRide = async (rideId: string) => {
+    setProcessingRequestId(rideId);
+    setErrorMessage(null);
+
+    try {
+      await apiClient(`/driver/rides/${rideId}/accept`, {
+        method: 'POST',
+      });
+      await refreshActivePool();
+    } catch (err: unknown) {
+      const msg =
+        err instanceof Error ? err.message : 'Failed to accept ride request.';
+      setErrorMessage(msg);
+    } finally {
+      setProcessingRequestId(null);
+    }
+  };
+
+  const handleRejectRide = async (rideId: string) => {
+    setProcessingRequestId(rideId);
+    setErrorMessage(null);
+
+    try {
+      await apiClient(`/driver/rides/${rideId}/reject`, {
+        method: 'POST',
+      });
+      await refreshActivePool();
+    } catch (err: unknown) {
+      const msg =
+        err instanceof Error ? err.message : 'Failed to decline ride request.';
+      setErrorMessage(msg);
+    } finally {
+      setProcessingRequestId(null);
+    }
+  };
+
   const totalEarningsBdt = (activePool?.passengers || []).reduce(
     (acc, p) => acc + (p.fareBdt || 0),
     0,
@@ -280,7 +319,16 @@ export default function DriverPage() {
           </div>
         </div>
 
-        {activePool && (
+        {activePool?.pendingRequests && activePool.pendingRequests.length > 0 && (
+          <IncomingRideRequestsCard
+            requests={activePool.pendingRequests}
+            onAccept={handleAcceptRide}
+            onReject={handleRejectRide}
+            processingId={processingRequestId}
+          />
+        )}
+
+        {activePool && activePool.passengers && activePool.passengers.length > 0 && (
           <TripActionButtons
             status={tripStatus}
             onUpdateStatus={handleUpdateStatus}

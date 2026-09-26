@@ -9,6 +9,7 @@ export interface ManifestPassenger {
   seats: number;
   status: string;
   fareBdt: number;
+  paymentMethod?: 'TESLAPAY' | 'CASH';
 }
 
 interface PassengerManifestTableProps {

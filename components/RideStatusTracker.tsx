@@ -53,12 +53,12 @@ const STEPS: { status: RideStatus; label: string; description: string }[] = [
   {
     status: 'REQUESTED',
     label: 'Requested',
-    description: 'Finding you a seat in Bullet...',
+    description: 'Dispatch sent! Waiting for Captain Jashim to accept...',
   },
   {
     status: 'MATCHED',
     label: 'Matched',
-    description: "Matched with Jashim's Bullet!",
+    description: "Captain accepted! Matched with Jashim's Bullet.",
   },
   {
     status: 'DRIVER_ARRIVED',
@@ -161,6 +161,13 @@ export default function RideStatusTracker({
             </p>
           )}
         </div>
+
+        {ride.status === 'REQUESTED' && (
+          <div className="mt-3 flex items-center justify-center gap-2 rounded-xl border border-amber-200 bg-amber-50 p-2.5 text-xs font-semibold text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-300">
+            <Loader2 className="h-4 w-4 animate-spin text-amber-600" />
+            <span>Notified Captain Jashim • Awaiting trip acceptance</span>
+          </div>
+        )}
       </div>
 
       <div className="rounded-xl border border-zinc-200 bg-zinc-50/60 p-4 dark:border-zinc-800 dark:bg-zinc-800/40">
@@ -211,7 +218,22 @@ export default function RideStatusTracker({
           </div>
         )}
 
-        {isCompleted ? (
+        {isCancelled ? (
+          <div className="flex flex-col gap-2.5">
+            <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-center text-xs font-semibold text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
+              Trip request cancelled or declined. No wallet fare was charged.
+            </div>
+            {onNewBooking && (
+              <button
+                type="button"
+                onClick={onNewBooking}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-600 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-amber-500"
+              >
+                <span>Request New Bullet Ride</span>
+              </button>
+            )}
+          </div>
+        ) : isCompleted ? (
           <button
             onClick={onNewBooking}
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-emerald-500"
@@ -230,7 +252,7 @@ export default function RideStatusTracker({
                 <span>Cancelling Ride...</span>
               </>
             ) : (
-              <span>Cancel Ride</span>
+              <span>Cancel Ride Request</span>
             )}
           </button>
         )}
