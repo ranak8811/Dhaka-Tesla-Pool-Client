@@ -1,6 +1,13 @@
 'use client';
 
-import React, { createContext, useContext, useState, useSyncExternalStore } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useSyncExternalStore,
+} from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api-client';
 
@@ -9,6 +16,8 @@ export interface User {
   email: string;
   name: string;
   role: 'PASSENGER' | 'DRIVER' | 'ADMIN';
+  walletBalancePoysha?: number;
+  walletBalanceBdt?: number;
 }
 
 interface AuthResponse {
@@ -28,6 +37,8 @@ interface AuthContextType {
     role?: 'PASSENGER' | 'DRIVER',
   ) => Promise<void>;
   logout: () => void;
+  refreshProfile: () => Promise<void>;
+  topupWallet: (amountBdt?: number) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -110,12 +121,70 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.push('/login');
   };
 
+  const refreshProfile = useCallback(async (): Promise<void> => {
+    try {
+      const profile = await apiClient<User & { walletBalanceBdt?: number }>('/auth/me');
+      if (profile && profile.id) {
+        setSession((prev) => {
+          if (!prev.user) return prev;
+          const updatedUser: User = {
+            ...prev.user,
+            ...profile,
+          };
+          localStorage.setItem('tesla_user', JSON.stringify(updatedUser));
+          return { ...prev, user: updatedUser };
+        });
+      }
+    } catch {
+      // Ignore background errors
+    }
+  }, []);
+
+  useEffect(() => {
+    if (session.token) {
+      refreshProfile();
+    }
+  }, [session.token, refreshProfile]);
+
+  const topupWallet = async (amountBdt = 500): Promise<void> => {
+    const data = await apiClient<{
+      message: string;
+      walletBalancePoysha: number;
+      walletBalanceBdt: number;
+    }>('/auth/wallet/topup', {
+      method: 'POST',
+      body: JSON.stringify({ amountBdt }),
+    });
+
+    setSession((prev) => {
+      if (!prev.user) return prev;
+      const updatedUser: User = {
+        ...prev.user,
+        walletBalancePoysha: data.walletBalancePoysha,
+        walletBalanceBdt: data.walletBalanceBdt,
+      };
+      localStorage.setItem('tesla_user', JSON.stringify(updatedUser));
+      return { ...prev, user: updatedUser };
+    });
+  };
+
   const user = isHydrated ? session.user : null;
   const token = isHydrated ? session.token : null;
   const isLoading = !isHydrated;
 
   return (
-    <AuthContext.Provider value={{ user, token, isLoading, login, register, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        isLoading,
+        login,
+        register,
+        logout,
+        refreshProfile,
+        topupWallet,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

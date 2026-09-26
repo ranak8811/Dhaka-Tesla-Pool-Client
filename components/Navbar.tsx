@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { Zap, LogOut, User as UserIcon, Car, Compass } from 'lucide-react';
+import { Zap, LogOut, User as UserIcon, Car, Compass, Wallet } from 'lucide-react';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -57,6 +57,16 @@ export default function Navbar() {
                   <span>Driver Console</span>
                 </Link>
               )}
+
+              <div
+                title="Simulated TeslaPay Wallet Balance"
+                className="flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-800 shadow-sm dark:border-emerald-500/20 dark:bg-emerald-950/60 dark:text-emerald-300"
+              >
+                <Wallet className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                <span>
+                  ৳{(user.walletBalanceBdt ?? (user.walletBalancePoysha ? user.walletBalancePoysha / 100 : 500)).toFixed(2)}
+                </span>
+              </div>
 
               <div className="flex items-center gap-2 border-l border-zinc-200 pl-3 dark:border-zinc-800 sm:pl-4">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
