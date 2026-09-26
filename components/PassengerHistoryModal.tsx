@@ -26,6 +26,7 @@ export interface RideHistoryItem {
   status: 'COMPLETED' | 'CANCELLED' | string;
   totalFarePoysha: number;
   fareBdt: number;
+  paymentMethod?: 'TESLAPAY' | 'CASH';
   paymentStatus: string;
   createdAt: string;
   updatedAt: string;
@@ -198,9 +199,16 @@ export default function PassengerHistoryModal({
                           <span className="text-base font-black text-zinc-900 dark:text-white">
                             ৳{ride.fareBdt.toFixed(2)}
                           </span>
-                          <span className="ml-1.5 text-[10px] uppercase font-bold tracking-wider text-emerald-600 dark:text-emerald-400">
-                            {ride.paymentStatus}
-                          </span>
+                          <div className="flex items-center justify-end gap-1.5 mt-0.5">
+                            {ride.paymentMethod && (
+                              <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400">
+                                {ride.paymentMethod === 'TESLAPAY' ? '⚡ TeslaPay' : '💵 Cash'}
+                              </span>
+                            )}
+                            <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-600 dark:text-emerald-400">
+                              {ride.paymentStatus}
+                            </span>
+                          </div>
                         </div>
                       </div>
 

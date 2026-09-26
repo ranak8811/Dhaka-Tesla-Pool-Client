@@ -1,5 +1,14 @@
 import React from 'react';
-import { Zap, ShieldCheck, TrendingDown, Loader2 } from 'lucide-react';
+import {
+  Zap,
+  ShieldCheck,
+  TrendingDown,
+  Loader2,
+  Wallet,
+  Banknote,
+  AlertCircle,
+  PlusCircle,
+} from 'lucide-react';
 
 export interface FareQuote {
   distanceKm: number;
@@ -25,6 +34,11 @@ interface FareEstimateCardProps {
   onBook: () => void;
   isBooking: boolean;
   seatsRequested?: number;
+  paymentMethod?: 'TESLAPAY' | 'CASH';
+  onPaymentMethodChange?: (method: 'TESLAPAY' | 'CASH') => void;
+  walletBalanceBdt?: number;
+  onTopup?: () => Promise<void>;
+  isToppingUp?: boolean;
 }
 
 export default function FareEstimateCard({
@@ -33,6 +47,11 @@ export default function FareEstimateCard({
   onBook,
   isBooking,
   seatsRequested = 1,
+  paymentMethod = 'TESLAPAY',
+  onPaymentMethodChange,
+  walletBalanceBdt = 500,
+  onTopup,
+  isToppingUp = false,
 }: FareEstimateCardProps) {
   if (loading) {
     return (
@@ -135,9 +154,78 @@ export default function FareEstimateCard({
         </div>
       </div>
 
+      {/* Payment Method Selector */}
+      <div className="mt-4 space-y-2">
+        <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">
+          Payment Method
+        </label>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={() => onPaymentMethodChange?.('TESLAPAY')}
+            className={`flex flex-col items-start rounded-xl border p-3 text-left transition-all ${
+              paymentMethod === 'TESLAPAY'
+                ? 'border-emerald-600 bg-emerald-50/80 text-emerald-950 dark:bg-emerald-950/60 dark:text-emerald-200 shadow-sm'
+                : 'border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-800/40 dark:text-zinc-300'
+            }`}
+          >
+            <div className="flex items-center gap-1.5 text-xs font-bold">
+              <Wallet className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+              <span>TeslaPay Wallet</span>
+            </div>
+            <span className="mt-1 text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">
+              Balance: ৳{(walletBalanceBdt ?? 500).toFixed(2)}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onPaymentMethodChange?.('CASH')}
+            className={`flex flex-col items-start rounded-xl border p-3 text-left transition-all ${
+              paymentMethod === 'CASH'
+                ? 'border-emerald-600 bg-emerald-50/80 text-emerald-950 dark:bg-emerald-950/60 dark:text-emerald-200 shadow-sm'
+                : 'border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-800/40 dark:text-zinc-300'
+            }`}
+          >
+            <div className="flex items-center gap-1.5 text-xs font-bold">
+              <Banknote className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+              <span>Cash to Captain</span>
+            </div>
+            <span className="mt-1 text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">
+              Pay upon trip completion
+            </span>
+          </button>
+        </div>
+
+        {/* Insufficient balance warning + instant topup */}
+        {paymentMethod === 'TESLAPAY' && (walletBalanceBdt ?? 500) < pooledTotalBdt && (
+          <div className="flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 p-2.5 text-xs text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-300">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+              <span>Low wallet balance!</span>
+            </div>
+            {onTopup && (
+              <button
+                type="button"
+                onClick={onTopup}
+                disabled={isToppingUp}
+                className="flex items-center gap-1 rounded-lg bg-amber-600 px-2 py-1 text-[11px] font-bold text-white shadow-sm hover:bg-amber-700 disabled:opacity-50"
+              >
+                {isToppingUp ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <PlusCircle className="h-3 w-3" />
+                )}
+                <span>+ Top Up ৳500</span>
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
       <button
         onClick={onBook}
-        disabled={isBooking}
+        disabled={isBooking || (paymentMethod === 'TESLAPAY' && (walletBalanceBdt ?? 500) < pooledTotalBdt)}
         className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3 text-sm font-bold text-white shadow-md shadow-emerald-600/20 transition-all hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isBooking ? (
@@ -145,10 +233,14 @@ export default function FareEstimateCard({
             <Loader2 className="h-4 w-4 animate-spin" />
             <span>Reserving Your Seat{seats > 1 ? 's' : ''}...</span>
           </>
+        ) : paymentMethod === 'TESLAPAY' && (walletBalanceBdt ?? 500) < pooledTotalBdt ? (
+          <span>Top Up TeslaPay or Select Cash</span>
         ) : (
           <>
             <ShieldCheck className="h-4 w-4" />
-            <span>Confirm Booking ({seats} {seats === 1 ? 'Seat' : 'Seats'}) • ৳{pooledTotalBdt.toFixed(2)}</span>
+            <span>
+              Confirm Booking ({seats} {seats === 1 ? 'Seat' : 'Seats'}) • ৳{pooledTotalBdt.toFixed(2)}
+            </span>
           </>
         )}
       </button>

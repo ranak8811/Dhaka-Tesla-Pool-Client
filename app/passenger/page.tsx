@@ -45,13 +45,15 @@ const DEFAULT_ZONES: Zone[] = [
 ];
 
 export default function PassengerPage() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, refreshProfile, topupWallet } = useAuth();
   const router = useRouter();
 
   const [zones, setZones] = useState<Zone[]>(DEFAULT_ZONES);
   const [pickupZone, setPickupZone] = useState<string>('banani');
   const [destinationZone, setDestinationZone] = useState<string>('mohakhali');
   const [seatsRequested, setSeatsRequested] = useState<number>(1);
+  const [paymentMethod, setPaymentMethod] = useState<'TESLAPAY' | 'CASH'>('TESLAPAY');
+  const [isToppingUp, setIsToppingUp] = useState<boolean>(false);
 
   const [quote, setQuote] = useState<FareQuote | null>(null);
   const [isQuoteLoading, setIsQuoteLoading] = useState<boolean>(false);
@@ -62,6 +64,19 @@ export default function PassengerPage() {
   const [isCancelling, setIsCancelling] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isHistoryOpen, setIsHistoryOpen] = useState<boolean>(false);
+
+  const handleTopup = async () => {
+    setIsToppingUp(true);
+    try {
+      await topupWallet(500);
+      setErrorMessage(null);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Top up failed.';
+      setErrorMessage(msg);
+    } finally {
+      setIsToppingUp(false);
+    }
+  };
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -221,6 +236,7 @@ export default function PassengerPage() {
           pickupZone,
           destinationZone,
           seatsRequested,
+          paymentMethod,
         }),
       });
 
@@ -229,6 +245,7 @@ export default function PassengerPage() {
         setActiveRide(rideData);
       }
       await refreshActiveRide();
+      await refreshProfile();
     } catch (err: unknown) {
       const msg =
         err instanceof Error ? err.message : 'Booking request failed.';
@@ -252,6 +269,7 @@ export default function PassengerPage() {
       setQuote(null);
       setPickupZone('banani');
       setDestinationZone('mohakhali');
+      await refreshProfile();
     } catch (err: unknown) {
       const msg =
         err instanceof Error ? err.message : 'Failed to cancel the ride.';
@@ -264,6 +282,7 @@ export default function PassengerPage() {
   const handleNewBooking = () => {
     setActiveRide(null);
     setQuote(null);
+    refreshProfile();
   };
 
   if (isLoading || !user || isCheckingRide) {
@@ -410,6 +429,14 @@ export default function PassengerPage() {
               onBook={handleBookRide}
               isBooking={isBooking}
               seatsRequested={seatsRequested}
+              paymentMethod={paymentMethod}
+              onPaymentMethodChange={setPaymentMethod}
+              walletBalanceBdt={
+                user?.walletBalanceBdt ??
+                (user?.walletBalancePoysha ? user.walletBalancePoysha / 100 : 500)
+              }
+              onTopup={handleTopup}
+              isToppingUp={isToppingUp}
             />
           </div>
         </div>
