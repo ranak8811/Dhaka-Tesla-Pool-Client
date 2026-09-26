@@ -6,12 +6,14 @@ import { useAuth } from '@/context/AuthContext';
 import { apiClient } from '@/lib/api-client';
 import FareEstimateCard, { FareQuote } from '@/components/FareEstimateCard';
 import RideStatusTracker, { ActiveRide } from '@/components/RideStatusTracker';
+import PassengerHistoryModal from '@/components/PassengerHistoryModal';
 import {
   MapPin,
   Users,
   Compass,
   AlertCircle,
   Sparkles,
+  History,
 } from 'lucide-react';
 
 interface Zone {
@@ -59,6 +61,7 @@ export default function PassengerPage() {
   const [isBooking, setIsBooking] = useState<boolean>(false);
   const [isCancelling, setIsCancelling] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isHistoryOpen, setIsHistoryOpen] = useState<boolean>(false);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -282,8 +285,16 @@ export default function PassengerPage() {
             Welcome, <span className="font-bold text-emerald-600 dark:text-emerald-400">{user.name}</span>. Book a clean EV seat in Bullet.
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+        <div className="flex items-center gap-2.5">
+          <button
+            type="button"
+            onClick={() => setIsHistoryOpen(true)}
+            className="flex items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-xs font-bold text-zinc-700 shadow-sm transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+          >
+            <History className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+            <span>Past Trips</span>
+          </button>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-semibold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
             <Sparkles className="h-3.5 w-3.5" /> 100% Electric Carpool
           </span>
         </div>
@@ -403,6 +414,11 @@ export default function PassengerPage() {
           </div>
         </div>
       )}
+
+      <PassengerHistoryModal
+        isOpen={isHistoryOpen}
+        onClose={() => setIsHistoryOpen(false)}
+      />
     </div>
   );
 }
