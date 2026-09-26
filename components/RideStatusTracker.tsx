@@ -22,6 +22,8 @@ export interface ActiveRide {
   seatsRequested: number;
   farePoysha?: number;
   totalFarePoysha?: number;
+  paymentMethod?: 'TESLAPAY' | 'CASH';
+  paymentStatus?: string;
   status: RideStatus;
   createdAt?: string;
   pool?: {
@@ -102,6 +104,11 @@ export default function RideStatusTracker({
           </h2>
         </div>
         <div className="flex items-center gap-2">
+          {ride.paymentMethod && (
+            <span className="rounded-full bg-zinc-100 px-2.5 py-1 text-[11px] font-bold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+              {ride.paymentMethod === 'TESLAPAY' ? '⚡ TeslaPay' : '💵 Cash'}
+            </span>
+          )}
           <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-bold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
             {ride.seatsRequested || 1} {ride.seatsRequested === 1 ? 'Seat' : 'Seats'}
           </span>

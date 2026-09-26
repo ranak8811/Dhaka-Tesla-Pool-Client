@@ -22,6 +22,7 @@ export interface DriverHistoryPassenger {
   drop: string;
   seats: number;
   status: string;
+  paymentMethod?: string;
   fareBdt: number;
 }
 
@@ -237,8 +238,15 @@ export default function DriverHistoryModal({
                               </span>
                             </div>
                           </div>
-                          <div className="text-right font-black text-zinc-900 dark:text-zinc-100">
-                            ৳{p.fareBdt.toFixed(2)}
+                          <div className="text-right">
+                            <span className="font-black text-zinc-900 dark:text-zinc-100">
+                              ৳{p.fareBdt.toFixed(2)}
+                            </span>
+                            {p.paymentMethod && (
+                              <div className="text-[10px] font-bold text-zinc-400">
+                                {p.paymentMethod === 'TESLAPAY' ? '⚡ TeslaPay' : '💵 Cash'}
+                              </div>
+                            )}
                           </div>
                         </div>
                       ))}
