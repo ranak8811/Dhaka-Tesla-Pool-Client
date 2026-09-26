@@ -9,6 +9,7 @@ import PassengerManifestTable, {
   ManifestPassenger,
 } from '@/components/PassengerManifestTable';
 import TripActionButtons from '@/components/TripActionButtons';
+import DriverHistoryModal from '@/components/DriverHistoryModal';
 import {
   Car,
   Power,
@@ -16,6 +17,7 @@ import {
   AlertCircle,
   Loader2,
   Sparkles,
+  History,
 } from 'lucide-react';
 
 interface ActivePoolData {
@@ -51,6 +53,7 @@ export default function DriverPage() {
   const [isTogglingStatus, setIsTogglingStatus] = useState<boolean>(false);
   const [isUpdatingTrip, setIsUpdatingTrip] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isHistoryOpen, setIsHistoryOpen] = useState<boolean>(false);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -205,22 +208,33 @@ export default function DriverPage() {
           </p>
         </div>
 
-        <button
-          onClick={handleToggleOnline}
-          disabled={isTogglingStatus}
-          className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold shadow-sm transition-all ${
-            isOnline
-              ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-              : 'border border-zinc-300 bg-zinc-200 text-zinc-700 hover:bg-zinc-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300'
-          }`}
-        >
-          {isTogglingStatus ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Power className="h-4 w-4" />
-          )}
-          <span>{isOnline ? 'ONLINE & ACCEPTING' : 'OFFLINE'}</span>
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setIsHistoryOpen(true)}
+            className="flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-xs font-bold text-zinc-700 shadow-sm transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+          >
+            <History className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+            <span>Trip Archive</span>
+          </button>
+
+          <button
+            onClick={handleToggleOnline}
+            disabled={isTogglingStatus}
+            className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold shadow-sm transition-all ${
+              isOnline
+                ? 'bg-emerald-600 text-white hover:bg-emerald-700'
+                : 'border border-zinc-300 bg-zinc-200 text-zinc-700 hover:bg-zinc-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300'
+            }`}
+          >
+            {isTogglingStatus ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Power className="h-4 w-4" />
+            )}
+            <span>{isOnline ? 'ONLINE & ACCEPTING' : 'OFFLINE'}</span>
+          </button>
+        </div>
       </div>
 
       {errorMessage && (
@@ -278,6 +292,11 @@ export default function DriverPage() {
           passengers={activePool?.passengers || []}
         />
       </div>
+
+      <DriverHistoryModal
+        isOpen={isHistoryOpen}
+        onClose={() => setIsHistoryOpen(false)}
+      />
     </div>
   );
 }
