@@ -1,7 +1,6 @@
 # Dhaka Tesla Pool (ঢাকা টেসলা পুল) — Client Web App
 
 > **Next.js 16 (Turbopack) Web Application for Electric Autonomous Corridor Ridesharing in Dhaka City**  
-> *Developed for RobanDevs Engineering Internship Evaluation · P0 Submission*
 
 [![Next.js](https://img.shields.io/badge/Next.js-16.3-black?logo=next.js&logoColor=white)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19.0-61DAFB?logo=react&logoColor=black)](https://react.dev/)
