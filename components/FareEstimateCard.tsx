@@ -8,7 +8,25 @@ import {
   Banknote,
   AlertCircle,
   PlusCircle,
+  Sparkles,
+  Clock,
+  Leaf,
+  BatteryCharging,
 } from 'lucide-react';
+
+export interface AiCorridorForecast {
+  congestionLevel: 'LOW' | 'MODERATE' | 'HEAVY' | 'SEVERE_GRIDLOCK';
+  predictedDurationMinutes: number;
+  nominalDurationMinutes: number;
+  delayMinutes: number;
+  demandSurgeMultiplier: number;
+  demandLevel: 'LOW' | 'NORMAL' | 'PEAK_RUSH';
+  smartRecommendation: string;
+  batteryConsumptionPercent: number;
+  co2SavedKg: number;
+  confidenceScore: number;
+  modelUsed: string;
+}
 
 export interface FareQuote {
   distanceKm: number;
@@ -26,6 +44,7 @@ export interface FareQuote {
     totalFareBdt: number;
     savingsBdt: number;
   };
+  aiForecast?: AiCorridorForecast | null;
 }
 
 interface FareEstimateCardProps {
@@ -130,6 +149,85 @@ export default function FareEstimateCard({
           </span>
         </div>
       </div>
+
+      {/* AI Corridor Intelligence (Google Gemini) */}
+      {quote.aiForecast && (
+        <div className="mt-4 overflow-hidden rounded-xl border border-violet-200 bg-gradient-to-br from-violet-50/70 via-indigo-50/40 to-white p-4 shadow-xs dark:border-violet-900/60 dark:from-violet-950/30 dark:via-zinc-900/50 dark:to-zinc-900">
+          <div className="flex items-center justify-between border-b border-violet-100 pb-2 dark:border-violet-900/50">
+            <div className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-violet-800 dark:text-violet-300">
+              <Sparkles className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+              <span>AI Corridor Intelligence</span>
+            </div>
+            <span className="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-mono font-bold text-violet-700 dark:bg-violet-900/50 dark:text-violet-300">
+              {quote.aiForecast.modelUsed}
+            </span>
+          </div>
+
+          <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+            <div className="flex items-center gap-2 rounded-lg bg-white/80 p-2 dark:bg-zinc-800/60">
+              <Clock className="h-4 w-4 shrink-0 text-indigo-600 dark:text-indigo-400" />
+              <div>
+                <span className="text-[10px] uppercase text-zinc-500">Predicted ETA</span>
+                <p className="font-bold text-zinc-900 dark:text-zinc-100">
+                  ~{quote.aiForecast.predictedDurationMinutes} mins
+                  {quote.aiForecast.delayMinutes > 0 && (
+                    <span className="ml-1 text-[10px] font-semibold text-amber-600 dark:text-amber-400">
+                      (+{quote.aiForecast.delayMinutes}m delay)
+                    </span>
+                  )}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 rounded-lg bg-white/80 p-2 dark:bg-zinc-800/60">
+              <Zap className="h-4 w-4 shrink-0 text-amber-500" />
+              <div>
+                <span className="text-[10px] uppercase text-zinc-500">Traffic Congestion</span>
+                <p className="font-bold text-zinc-900 dark:text-zinc-100">
+                  <span
+                    className={`inline-block rounded-xs px-1.5 py-0.2 text-[10px] font-bold ${
+                      quote.aiForecast.congestionLevel === 'LOW'
+                        ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+                        : quote.aiForecast.congestionLevel === 'MODERATE'
+                        ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
+                        : 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'
+                    }`}
+                  >
+                    {quote.aiForecast.congestionLevel.replace('_', ' ')}
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 rounded-lg bg-white/80 p-2 dark:bg-zinc-800/60">
+              <Leaf className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+              <div>
+                <span className="text-[10px] uppercase text-zinc-500">CO₂ Prevented</span>
+                <p className="font-bold text-emerald-700 dark:text-emerald-400">
+                  {quote.aiForecast.co2SavedKg} kg CO₂
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 rounded-lg bg-white/80 p-2 dark:bg-zinc-800/60">
+              <BatteryCharging className="h-4 w-4 shrink-0 text-sky-600 dark:text-sky-400" />
+              <div>
+                <span className="text-[10px] uppercase text-zinc-500">Model Y Battery</span>
+                <p className="font-bold text-sky-700 dark:text-sky-400">
+                  ~{quote.aiForecast.batteryConsumptionPercent}%
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-2.5 rounded-lg border border-violet-100 bg-white/90 p-2.5 text-[11px] text-zinc-700 dark:border-violet-900/40 dark:bg-zinc-800/70 dark:text-zinc-300">
+            <span className="mr-1 font-bold text-violet-700 dark:text-violet-400">
+              ⚡ AI Smart Advice:
+            </span>
+            {quote.aiForecast.smartRecommendation}
+          </div>
+        </div>
+      )}
 
       <div className="mt-4 rounded-lg bg-zinc-50 p-3 text-xs text-zinc-600 dark:bg-zinc-800/50 dark:text-zinc-400">
         <div className="flex justify-between py-0.5">
