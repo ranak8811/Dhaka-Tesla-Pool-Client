@@ -69,7 +69,7 @@ export default function DriverPage() {
     async function loadDriverProfile() {
       if (!user) return;
       try {
-        const profile = await apiClient<ProfileResponse>('/auth/profile');
+        const profile = await apiClient<ProfileResponse>('/auth/me');
         if (!ignore && profile.vehicle) {
           setIsOnline(profile.vehicle.isOnline);
         }
